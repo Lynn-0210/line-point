@@ -8,14 +8,14 @@
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f7f9; color: #333; }
     .card { background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-    #photo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff4081; display: none; margin: 0 auto 15px; }
-    #points { font-size: 80px; color: #ff4081; font-weight: bold; margin: 10px 0; }
+    #photo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff9800; display: none; margin: 0 auto 15px; }
+    #points { font-size: 80px; color: #ff9800; font-weight: bold; margin: 10px 0; }
     .btn { padding: 15px; border: none; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 15px; color: white; }
-    #btnLogin { background-color: #ff4081; }
+    #btnLogin { background-color: #ff9800; }
     .btn-upload { background-color: #333; position: relative; }
     input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-    .hint { font-size: 13px; color: #666; background: #fff0f5; padding: 15px; border-radius: 10px; text-align: left; line-height: 1.6; border-left: 5px solid #ff4081; }
-    #status { margin-top: 20px; font-size: 14px; color: #ff4081; font-weight: bold; }
+    .hint { font-size: 13px; color: #666; background: #fff8e1; padding: 15px; border-radius: 10px; text-align: left; line-height: 1.6; border-left: 5px solid #ff9800; }
+    #status { margin-top: 20px; font-size: 14px; color: #ff9800; font-weight: bold; }
     #preview { max-width: 100%; border-radius: 10px; margin-top: 15px; display: none; }
   </style>
 </head>
@@ -48,9 +48,9 @@
   </div>
 
   <script>
-    // 🔴 這裡請填寫你原本的 ID 和 網址
+    // 🔴 2. 修改區：請填入你的 ID 和 網址
     const MY_LIFF_ID = "2008809788-bwJx5orN"; 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwQWaR0_gqGdJgj649FxGXMssuqdlA0Zur7rRV5lWTzl8-XBgjqaoCVjHr8xF5vNDHcZQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwQWaRO_gqGdJgj649FxGXmSsuqdlAOZur7rRV5lWTzl8-XBgjqaoCVjHr8xF5vNDHcZQ/exec"; 
 
     let userProfile = null;
 
@@ -77,7 +77,6 @@
       fetch(`${GAS_API_URL}?action=getPoints&userId=${userProfile.userId}`)
         .then(res => res.json())
         .then(data => {
-            // 因為只剩線上了，我們統一抓 regular 分數顯示
             document.getElementById('points').innerText = data.regular;
         });
     }
@@ -85,7 +84,7 @@
     function handleFile(input) {
       if (input.files && input.files[0]) {
         const status = document.getElementById('status');
-        status.innerText = "🚀 助理 正在核對「線上集點」中...";
+        status.innerText = "🚀 AI 正在核對「上線集點」中...";
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = new Image();
@@ -113,21 +112,21 @@
             body: JSON.stringify({
                 image: base64,
                 userId: userProfile.userId,
-                displayName: userProfile.displayName,
-                category: "regular" // 固定傳送為線上分類
+                displayName: userProfile.displayName
             })
         })
         .then(res => res.json())
         .then(res => {
             if (res.status === "SUCCESS") {
-                alert("🎉 恭喜！線上集點成功，獲得 " + res.added + " 點");
+                alert("🎉 恭喜！「上線集點」成功，獲得 " + res.added + " 點");
                 document.getElementById('points').innerText = res.current.regular;
                 document.getElementById('status').innerText = "✅ 領取成功";
             } else {
                 alert("❌ 審核失敗：\n" + res.message);
                 document.getElementById('status').innerText = "❌ 失敗";
             }
-        });
+        })
+        .catch(err => alert("連線錯誤: " + err));
     }
   </script>
 </body>
