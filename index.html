@@ -50,12 +50,13 @@
     </div>
   </div>
   <script>
-    // 🔴 這裡一定要填寫你自己的 ID 和網址
-    const MY_LIFF_ID = "https://liff.line.me/2008809788-bwJx5orN"; 
+    // 🔴 這裡請填寫你自己的 ID 和 網址
+    const MY_LIFF_ID = "2008809788-bwJx5orN"; 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwQWaRO_gqGdJgj649FxGXmSsuqdlAOZur7rRV5lWTzl8-XBgjqaoCVjHr8xF5vNDHcZQ/exec"; 
 
     let userProfile = null;
     let currentPointsData = { event: 0, regular: 0 };
+
     window.onload = async function() {
       try {
         await liff.init({ liffId: MY_LIFF_ID });
