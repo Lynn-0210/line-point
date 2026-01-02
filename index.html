@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>線上集點換禮物</title>
+  <title>上線集點換禮物</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f7f9; color: #333; }
@@ -21,7 +21,7 @@
 </head>
 <body>
   <div class="card">
-    <h2 id="title">線上集點換禮物</h2>
+    <h2 id="title">上線集點換禮物</h2>
     <div id="loginArea">
         <button id="btnLogin" class="btn" onclick="liff.login()">LINE 帳號登入</button>
     </div>
@@ -33,9 +33,9 @@
         
         <div class="hint">
           <b>🌟 集點規則：</b><br>
-          1. 截圖需包含關鍵字：<b>線上集點換禮物</b><br>
+          1. 截圖需包含關鍵字：<b>上線集點換禮物</b><br>
           2. 截圖需顯示<b>今日日期</b>。<br>
-          3. 審核通過即可獲得 10 點！
+          3. 審核通過即可獲得 1 點！
         </div>
         
         <div class="btn btn-upload">
@@ -85,7 +85,7 @@
     function handleFile(input) {
       if (input.files && input.files[0]) {
         const status = document.getElementById('status');
-        status.innerText = "🚀 AI 正在核對「線上集點」中...";
+        status.innerText = "🚀 助理 正在核對「線上集點」中...";
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = new Image();
