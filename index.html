@@ -1,133 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>上線集點換禮物</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f7f9; color: #333; }
-    .card { background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-    #photo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff9800; display: none; margin: 0 auto 15px; }
-    #points { font-size: 80px; color: #ff9800; font-weight: bold; margin: 10px 0; }
-    .btn { padding: 15px; border: none; border-radius: 50px; font-size: 18px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 15px; color: white; }
-    #btnLogin { background-color: #ff9800; }
-    .btn-upload { background-color: #333; position: relative; }
-    input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-    .hint { font-size: 13px; color: #666; background: #fff8e1; padding: 15px; border-radius: 10px; text-align: left; line-height: 1.6; border-left: 5px solid #ff9800; }
-    #status { margin-top: 20px; font-size: 14px; color: #ff9800; font-weight: bold; }
-    #preview { max-width: 100%; border-radius: 10px; margin-top: 15px; display: none; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2 id="title">上線集點換禮物</h2>
-    <div id="loginArea">
-        <button id="btnLogin" class="btn" onclick="liff.login()">LINE 帳號登入</button>
-    </div>
-    <div id="memberArea" style="display:none;">
-        <img id="photo" src="">
-        <h2 id="name"></h2>
-        <p style="margin:0; color:#888;">我的累積點數</p>
-        <div id="points">0</div>
-        
-        <div class="hint">
-          <b>🌟 集點規則：</b><br>
-          1. 截圖需包含關鍵字：<b>上線集點換禮物</b><br>
-          2. 截圖需顯示<b>今日日期</b>。<br>
-          3. 審核通過即可獲得 1 點！
-        </div>
-        
-        <div class="btn btn-upload">
-          上傳截圖領積分
-          <input type="file" accept="image/*" onchange="handleFile(this)">
-        </div>
-        <img id="preview" src="">
-        <p id="status"></p>
-    </div>
-  </div>
+function analyzeWithAI(base64) {
+  const today = Utilities.formatDate(new Date(), "GMT+8", "yyyy/MM/dd");
+  const keyword = "上線集點換禮物";
+  
+  // 💡 修正點：使用最穩定的 v1beta 版本，並確保網址結尾沒有多餘的斜線或符號
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+  
+  const prompt = "你是一個嚴格的集點審核員。請分析這張圖並檢查：1. 是否包含文字「" + keyword + "」。2. 是否包含日期「" + today + "」。若符合請回傳JSON: {\"ok\": true, \"points\": 1, \"items\": \"成功\", \"reason\": \"\"} 否則回傳 {\"ok\": false, \"points\": 0, \"items\": \"\", \"reason\": \"不符規則\"}";
 
-  <script>
-    // 🔴 2. 修改區：請填入你的 ID 和 網址
-    const MY_LIFF_ID = "2008809788-bwJx5orN"; 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwQWaRO_gqGdJgj649FxGXmSsuqdlAOZur7rRV5lWTzl8-XBgjqaoCVjHr8xF5vNDHcZQ/exec"; 
+  const payload = {
+    "contents": [{
+      "parts": [
+        { "text": prompt },
+        { "inline_data": { "mime_type": "image/jpeg", "data": base64 } }
+      ]
+    }]
+  };
 
-    let userProfile = null;
+  const options = {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  };
 
-    window.onload = async function() {
-      try {
-        await liff.init({ liffId: MY_LIFF_ID });
-        if (liff.isLoggedIn()) {
-          liff.getProfile().then(profile => {
-            userProfile = profile;
-            document.getElementById('loginArea').style.display = "none";
-            document.getElementById('memberArea').style.display = "block";
-            document.getElementById('name').innerText = profile.displayName + " 同學";
-            if(profile.pictureUrl) {
-               document.getElementById('photo').src = profile.pictureUrl;
-               document.getElementById('photo').style.display = "block";
-            }
-            refreshPoints();
-          });
-        }
-      } catch (err) { console.error(err); }
-    };
+  const res = UrlFetchApp.fetch(url, options);
+  const resText = res.getContentText();
+  const json = JSON.parse(resText);
+  
+  // 檢查 API 是否報錯
+  if (json.error) {
+    throw new Error("AI 服務錯誤: " + json.error.message);
+  }
 
-    function refreshPoints() {
-      fetch(`${GAS_API_URL}?action=getPoints&userId=${userProfile.userId}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('points').innerText = data.regular;
-        });
-    }
-
-    function handleFile(input) {
-      if (input.files && input.files[0]) {
-        const status = document.getElementById('status');
-        status.innerText = "🚀 AI 正在核對「上線集點」中...";
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxWidth = 1000;
-                const scale = maxWidth / img.width;
-                canvas.width = maxWidth;
-                canvas.height = img.height * scale;
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                const base64 = canvas.toDataURL('image/jpeg', 0.8);
-                document.getElementById('preview').src = base64;
-                document.getElementById('preview').style.display = "block";
-                upload(base64);
-            }
-        }
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
-    function upload(base64) {
-        fetch(GAS_API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                image: base64,
-                userId: userProfile.userId,
-                displayName: userProfile.displayName
-            })
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.status === "SUCCESS") {
-                alert("🎉 恭喜！「上線集點」成功，獲得 " + res.added + " 點");
-                document.getElementById('points').innerText = res.current.regular;
-                document.getElementById('status').innerText = "✅ 領取成功";
-            } else {
-                alert("❌ 審核失敗：\n" + res.message);
-                document.getElementById('status').innerText = "❌ 失敗";
-            }
-        })
-        .catch(err => alert("連線錯誤: " + err));
-    }
-  </script>
-</body>
-</html>
+  // 取得 AI 回傳的文字並清理
+  let aiText = json.candidates[0].content.parts[0].text;
+  aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(aiText);
+}
